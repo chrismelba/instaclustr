@@ -1,4 +1,108 @@
-#Instaclustr Technical interview
+# Instaclustr Technical interview
+
+
+## 2. General Administrator
+
+Connected to the server using PuTTY. First had to convert .pem into .ppk file [<sup>1</sup>](https://stackoverflow.com/questions/3190667/convert-pem-to-ppk-file-format)
+
+Ran 'top -i' to get a view of current processes. All processes are idle, though somehow >85% of our memory is being used
+
+```
+top - 07:33:57 up 1 day,  8:36,  1 user,  load average: 0.00, 0.01, 0.05
+Tasks: 103 total,   1 running, 102 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem:   1016324 total,   877840 used,   138484 free,    23044 buffers
+KiB Swap:        0 total,        0 used,        0 free.    73240 cached Mem
+
+PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+```
+
+Ran 'ps -aux' to view all running processes by all users. This reveals that python is single-handedly using 70% of memory.
+
+```
+
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+....
+root       202  0.0  0.0      0     0 ?        S<   Oct12   0:00 [ext4-rsv-conver]
+root       225  0.0  0.0   4440   352 ?        Ss   Oct12   0:00 /bin/sh -e /proc/self/fd/9
+root       226  0.0 70.8 747648 720412 ?       Ss   Oct12   0:04 /usr/bin/python /var/lib/.instaclustr/hun
+root       604  0.0  0.2  10220  2876 ?        Ss   Oct12   0:00 dhclient -1 -v -pf /run/dhclient.eth0.pid
+message+   816  0.0  0.0  39220   832 ?        Ss   Oct12   0:00 dbus-daemon --system --fork
+....
+```
+
+Ran 'less /etc/passwd' to get a list of all users to check security. I don't see anything untoward here. There's a root user, and me as 'ubuntu', a whole lot of nologin users. I don't understand what the 'false' or 'sync' users are. Hopefully not indicative of something wrong?
+```
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+libuuid:x:100:101::/var/lib/libuuid:
+syslog:x:101:104::/home/syslog:/bin/false
+messagebus:x:102:106::/var/run/dbus:/bin/false
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+pollinate:x:105:1::/var/cache/pollinate:/bin/false
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
+```
+
+Used 'hostnamectl' to check version of linux. It's running ubuntu 14.04.6, which came out in March 2019 and reaches end of life in 2022. So slightly dated, but still in service. The Kernel dates back to 2015. I have no idea of kernels go out of date or are more tied to hardware?
+```
+   Static hostname: ip-172-31-15-229
+         Icon name: computer-vm
+           Chassis: vm
+           Boot ID: d9bb9538f5ce4e18a36adfa376b354d2
+  Operating System: Ubuntu 14.04.6 LTS
+            Kernel: Linux 3.13.0-74-generic
+      Architecture: x86_64
+```
+
+Ran 'dmidecode | more' to try to check BIOS status but was denied permission
+
+Ran lscpu to see what we're running on. Looks like a single core, single thread intel chip. Unsure if this just means it's virtual (like I assume it is?). Running lshw shows that we're on Intel Xeon which definitely sounds server-y
+``` 
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                1
+On-line CPU(s) list:   0
+Thread(s) per core:    1
+Core(s) per socket:    1
+Socket(s):             1
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 63
+Stepping:              2
+CPU MHz:               2400.056
+BogoMIPS:              4800.11
+Hypervisor vendor:     Xen
+Virtualization type:   full
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              30720K
+```
+
+
+### Additional things I would like to do:
+I would like to check the backup status of the machine, but I'd have to work out what backup utility it was using and don't see anything obvious.
+I would like to see what that python code is doing with all that memory, and possibly terminate it.
+You said there are 'a few' things wrong with this server, but I really only found that python program, so would love to know what I missed.
+
 
 ## 3. General Programming
 
@@ -45,7 +149,8 @@ fizzbuzz(['Insta', 3], ['clustr', 5])
 ```
 SELECT movies.title, movies.release_year, movies.genre, movies.director from movies
 WHERE movies.genre = 'action';
-#under the current database schema we could simply select * from movies, but this will continue to work if additional columns are added in the future
+# under the current database schema we could simply select * from movies, but specifying the desired fields
+# will continue to work if additional columns are added in the future
 
 
 SELECT DISTINCT actors.name, actors.birth_year
