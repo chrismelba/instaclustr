@@ -80,3 +80,15 @@ Immutable servers are, as they sound, servers that are never changed or updated.
 3. Instance is a specific node of for example a cassandra cluster. This is the individual machine (or more likely VM or container) that the app is running in.
 
 Fault domains are a way of understanding the redundancy in a server architecture built on AWS. A fault domain is a single point of failure, for example a fault domain at the AZ would fail if the entire AZ goes out, but not if one of it's constituant instances fails. If an application is running only on a single instance, then if that instance fails, either independantly or because of an AZ or Region failure, then the app itself will fail. By building nodes out across different AZs or even over different regions, higher resilliance and reliability can be achieved through redundancy.[<sup>6</sup>](https://lethain.com/fault-domains/)
+
+# 8. Networking Theory
+
+### A. Given a /8 base network (e.g. 10.0.0.0), show how to subnet it so there are at least 64 networks available.
+64 is 2^6 so our mask must be represented by six ones and two zeros 11111100 which is represented as 252 in decimal. Thus our subnet mask is 255.255.255.252.
+This allows for 4 hosts per subnet.[<sup>1</sup>](hhttps://www.comparitech.com/net-admin/subnetting-guide/)
+
+### B. Explain what NAT/PAT are.
+NAT is Network Address Translation while PAT is Port Address Translation. NAT requires a single external IP for every internal IP, while a PAT can take two internal IPs and translate their data to the external network through a single IP by putting the data for each on different ports [<sup>2</sup>](https://www.geeksforgeeks.org/difference-between-network-address-translation-nat-and-port-address-translation-pat/)
+
+### C. Explain what a VPN is.
+A VPN is a Virtual Private Network. It allows for traffic to be encrypted on the host computer, sent over the computers internet connection to a host, which can then route the traffic to a different node, potentially in a different location. This has a few uses. It allows for secure data transfer over an ordinarily untrustworthy network, such as at a cafe or hotel. It also allows a user to spoof their physical location, for example to watch USA netflix from Australia. Lately VPNs have been advertised heavily for consumers to use in their homes. The pitch seems to be that you can't trust your giant corporate ISP not to use your traffic inappropriately but you can trust a tiny fly-by-night startup much more. Why one should be more trustworthy than the other has always confused me.
