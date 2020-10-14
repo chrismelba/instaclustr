@@ -1,0 +1,59 @@
+BEGIN TRANSACTION ;
+
+CREATE TABLE actors (
+	name text,
+	birth_year int,
+	PRIMARY KEY (name, birth_year)
+	);
+
+CREATE TABLE movies (
+	title text,
+	release_year int,
+	genre text,
+	director text,
+	PRIMARY KEY (title, release_year)
+	);
+
+CREATE TABLE movie_cast (
+	movie text,
+	movie_release_year int,
+	actor text,
+	birth_year int,
+
+	FOREIGN KEY (movie, movie_release_year) REFERENCES movies (title, release_year) MATCH FULL,
+	FOREIGN KEY (actor, birth_year) REFERENCES actors (name, birth_year) MATCH FULL,
+
+	PRIMARY KEY (movie, movie_release_year, actor, birth_year)
+	);
+
+
+INSERT INTO actors (name, birth_year) VALUES ('Jeff Goldblum', 1952);
+INSERT INTO actors (name, birth_year) VALUES ('Bruce Willis', 1955);
+INSERT INTO actors (name, birth_year) VALUES ('Bill Murray', 1950);
+
+INSERT INTO movies (title, release_year, genre, director) VALUES ('Independence Day', 1996, 'action', 'Roland Emmerich');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('Jurassic Park', 1993, 'action', 'Steven Spielberg');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('Die Hard', 1988, 'action', 'John McTiernan');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('The Player', 1992, 'comedy', 'Robert Altman');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('The Grand Budapest Hotel', 2014, 'comedy', 'Wes Anderson');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('Moonrise Kingdom', 2012, 'comedy', 'Wes Anderson');
+INSERT INTO movies (title, release_year, genre, director) VALUES ('Ghostbusters', 1984, 'comedy', 'Ivan Reitman');
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Independence Day', 1996, 'Jeff Goldblum', 1952);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Jurassic Park', 1993, 'Jeff Goldblum', 1952);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Die Hard', 1988, 'Bruce Willis', 1955);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('The Player', 1992, 'Bruce Willis', 1955);
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('The Player', 1992, 'Jeff Goldblum', 1952);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('The Grand Budapest Hotel', 2014, 'Jeff Goldblum', 1952);
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('The Grand Budapest Hotel', 2014, 'Bill Murray', 1950);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Moonrise Kingdom', 2012, 'Bruce Willis', 1955);
+
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Moonrise Kingdom', 2012, 'Bill Murray', 1950);
+INSERT INTO movie_cast (movie, movie_release_year, actor, birth_year) VALUES ('Ghostbusters', 1984, 'Bill Murray', 1950);
+
+COMMIT;
