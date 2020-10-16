@@ -1,5 +1,39 @@
 # Instaclustr Technical interview
 
+## 1. Bash Scripting
+
+First section 
+
+```
+BaseDirectory=${1}
+
+find "$BaseDirectory" -type f | while read filename; 
+
+do 
+    echo $filename
+    NumberOfWords=$(wc -w < $filename) #Counting the words present in the file
+    echo "Number of words within this file: $NumberOfWords"
+    echo ""
+done
+```
+
+Extension
+
+Getting character frequencies taken from [here](https://stackoverflow.com/questions/3966820/bash-script-to-find-the-frequency-of-every-letter-in-a-file)
+Base directory set to make running on repl.it easier.
+
+```
+BaseDirectory=${1:-/home/runner/PossibleUsedFiletype}
+
+find "$BaseDirectory" -type f | while read filename; 
+
+do 
+    echo $filename
+    sed 's/\(.\)/\1\n/g' $filename | tr '[:upper:]' '[:lower:]' | grep '[a-z]' | sort | uniq -c
+done
+```
+This will output a numeric histogram for each individual file. I would love to aggregate them, but not familiar enough with bash to do so. I would also love to make an ASCII bar chart, I saw a few implementations around the place, but again, this is beyond my bash skills.
+
 
 ## 2. General Administrator
 
@@ -330,6 +364,9 @@ for row in rows:
 
 ```
 
+All code can be executed through the jupyter notebook 'cassandra.ipynb' found in this git.
+
+
 ## 7. Cloud Computing Theory
 
 ### A. What is the difference between container based virtualization and hypervisor based virtualization?
@@ -346,7 +383,7 @@ Immutable servers are, as they sound, servers that are never changed or updated.
 
 Fault domains are a way of understanding the redundancy in a server architecture built on AWS. A fault domain is a single point of failure, for example a fault domain at the AZ would fail if the entire AZ goes out, but not if one of it's constituant instances fails. If an application is running only on a single instance, then if that instance fails, either independantly or because of an AZ or Region failure, then the app itself will fail. By building nodes out across different AZs or even over different regions, higher resilliance and reliability can be achieved through redundancy.[<sup>6</sup>](https://lethain.com/fault-domains/)
 
-# 8. Networking Theory
+## 8. Networking Theory
 
 ### A. Given a /8 base network (e.g. 10.0.0.0), show how to subnet it so there are at least 64 networks available.
 64 is 2^6 so our mask must be represented by six ones and two zeros 11111100 which is represented as 252 in decimal. Thus our subnet mask is 255.255.255.252.
