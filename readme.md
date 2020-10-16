@@ -180,13 +180,16 @@ fizzbuzz(['Insta', 3], ['clustr', 5])
 
 
 ## 5. SQL Programming
+Part 1
 ```
 SELECT movies.title, movies.release_year, movies.genre, movies.director from movies
 WHERE movies.genre = 'action';
 # under the current database schema we could simply select * from movies, but specifying the desired fields
 # will continue to work if additional columns are added in the future
+```
 
-
+Part 2
+```
 SELECT DISTINCT actors.name, actors.birth_year
 FROM actors
 LEFT JOIN movie_cast
@@ -195,8 +198,10 @@ LEFT JOIN movies
 ON movie_cast.movie=movies.title
 WHERE movies.director = 'Wes Anderson';
 #This actually ends up being all the actors
+```
 
-
+Part 3
+```
 SELECT movies.title, movies.release_year, movies.genre, movies.director
 FROM movie_cast #
 RIGHT JOIN movies
@@ -251,7 +256,7 @@ session.execute("CREATE KEYSPACE tutorialspoint \n"
                 "WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};")
 ```
 
-Ok, now to upload the csv. I tried to execute the transaction created from uploading my csv to sql fiddle, but obviously there are enough differences between SQL and CQL that that didn't work. I've managed to now create the table by running the following 
+Ok, now to upload the csv. I tried to execute the transaction created from uploading my csv to sql fiddle, but obviously there are enough differences between SQL and CQL that that didn't work. I've managed to now create the table by running the following code. I'll be the first to admit that with Hollywood's current release strategy, using the title as the primary key is not that safe, but it'll have to do for now.
 
 ```
 session.execute("""
@@ -387,7 +392,7 @@ Fault domains are a way of understanding the redundancy in a server architecture
 
 ### A. Given a /8 base network (e.g. 10.0.0.0), show how to subnet it so there are at least 64 networks available.
 64 is 2^6 so our mask must be represented by six ones and two zeros 11111100 which is represented as 252 in decimal. Thus our subnet mask is 255.255.255.252.
-This allows for 4 hosts per subnet.[<sup>1</sup>](hhttps://www.comparitech.com/net-admin/subnetting-guide/)
+This allows for 4 hosts per subnet.[<sup>1</sup>](https://www.comparitech.com/net-admin/subnetting-guide/)
 
 ### B. Explain what NAT/PAT are.
 NAT is Network Address Translation while PAT is Port Address Translation. NAT requires a single external IP for every internal IP, while a PAT can take two internal IPs and translate their data to the external network through a single IP by putting the data for each on different ports [<sup>2</sup>](https://www.geeksforgeeks.org/difference-between-network-address-translation-nat-and-port-address-translation-pat/)
