@@ -170,6 +170,166 @@ ON movie_cast.movie=movies.title
 WHERE NOT movie_cast.actor = 'Bruce Willis' AND movie_cast.actor = 'Jeff Goldblum';
 ```
 
+## 6. Using Cassandra
+
+Spinning up a cluster as per the details in the email was fairly straightforward. I then started using the documentation [here](https://www.instaclustr.com/support/documentation/cassandra/using-cassandra/connecting-to-a-cluster/) to connect, create a keyspace and upload data.
+
+First I went to the connection info tab and found the IP addressess to connect to. I've already added my client IP to the firewall so I should be able to connect.
+```
+Public:
+"52.44.0.178", "34.197.95.64", "18.205.179.31"
+```
+
+Being familiar with python, I've decided to use it to connect to the cluster. I first have to install the cassandra driver
+```
+conda install -c conda-forge cassandra-driver
+```
+
+From your extremely nice demo code in python I was able to directly copy the following and conncect to my cluster. This showed my 3 nodes and that I was connected properly.
+
+```
+from cassandra.cluster import Cluster
+from cassandra.policies import DCAwareRoundRobinPolicy
+from cassandra.auth import PlainTextAuthProvider
+
+cluster = Cluster(
+    [
+        "52.44.0.178", "34.197.95.64", "18.205.179.31" # AWS_VPC_US_EAST_1 (Amazon Web Services)
+    ],
+    load_balancing_policy=DCAwareRoundRobinPolicy(local_dc='AWS_VPC_US_EAST_1'), # your local data centre
+    port=9042,
+    auth_provider=PlainTextAuthProvider (
+        username='iccassandra',
+        password='3e40b7ec5ead196a4b4bfd9bf0285dff'
+    )
+)
+session = cluster.connect()
+print('Connected to cluster %s' % cluster.metadata.cluster_name)
+
+for host in cluster.metadata.all_hosts():
+    print('Datacenter: %s; Host: %s; Rack: %s' % (host.datacenter, host.address, host.rack))
+
+```
+Right, lots of assumed knowledge around what keyspaces are and why I would want one. I think this is giving me enough of a gist to create one. Looks like it's around the replication strategy for a given set of tables? Anyway, using the following code I now seem to be the proud owner of my own keyspace. 
+
+```
+session.execute("CREATE KEYSPACE tutorialspoint \n"
+                "WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};")
+```
+
+Ok, now to upload the csv. I tried to execute the transaction created from uploading my csv to sql fiddle, but obviously there are enough differences between SQL and CQL that that didn't work. I've managed to now create the table by running the following 
+
+```
+session.execute("""
+
+        CREATE TABLE tutorialspoint.instaclustr(
+            
+            title text PRIMARY KEY,
+            release_year int,
+            genre text,
+            director text
+            ) ;
+
+                """)
+```
+
+We seem to have created a table, so now we need to add data to it:
+
+```
+session.execute("""
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('Independence Day', 1996, 'action', 'Roland Emmerich');
+                """)
+```
+
+Lets double check to see that some data is indeed in there:
+
+```
+session.row_factory = dict_factory
+rows = session.execute("""
+        SELECT * FROM instaclustr;
+                """)
+rows[0]
+
+out
+{'title': 'Independence Day',
+ 'director': 'Roland Emmerich',
+ 'genre': 'action',
+ 'release_year': 1996}
+```
+
+Looks like data! Now we just need to format the rest correctly. I could probably find/write a nice function to take data from a dataframe or csv and execute these transactions for me, but I'm so close to the end now, so I'll just brute force it:
+
+```
+session.execute("""  
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('Jurassic Park', 1993, 'action', 'Steven Spielberg');
+""")         
+session.execute("""        
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('Die Hard', 1988, 'action', 'John McTiernan');
+""")         
+session.execute("""        
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('The Player', 1992, 'comedy', 'Robert Altman');
+""")                 
+session.execute("""                
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('The Grand Budapest Hotel', 2014, 'comedy', 'Wes Anderson');
+""")         
+session.execute("""        
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('Moonrise Kingdom', 2012, 'comedy', 'Wes Anderson');
+""")                 
+session.execute("""                
+    INSERT INTO instaclustr
+        (title, release_year, genre, director)
+    VALUES
+        ('Ghostbusters', 1984, 'comedy', 'Ivan Reitman')
+    ;
+""") 
+```
+
+And a final check to see that it's all there:
+
+```
+
+session.row_factory = dict_factory
+rows = session.execute("""
+        SELECT * FROM instaclustr;
+                """)
+for row in rows:
+    print(row)
+
+result:
+for row in rows:
+
+    print(row)
+
+​
+
+{'title': 'The Player', 'director': 'Robert Altman', 'genre': 'comedy', 'release_year': 1992}
+{'title': 'Jurassic Park', 'director': 'Steven Spielberg', 'genre': 'action', 'release_year': 1993}
+{'title': 'Moonrise Kingdom', 'director': 'Wes Anderson', 'genre': 'comedy', 'release_year': 2012}
+{'title': 'Ghostbusters', 'director': 'Ivan Reitman', 'genre': 'comedy', 'release_year': 1984}
+{'title': 'Independence Day', 'director': 'Roland Emmerich', 'genre': 'action', 'release_year': 1996}
+{'title': 'Die Hard', 'director': 'John McTiernan', 'genre': 'action', 'release_year': 1988}
+{'title': 'The Grand Budapest Hotel', 'director': 'Wes Anderson', 'genre': 'comedy', 'release_year': 2014}
+
+```
+
 ## 7. Cloud Computing Theory
 
 ### A. What is the difference between container based virtualization and hypervisor based virtualization?
