@@ -178,6 +178,105 @@ fizzbuzz(['Insta', 3], ['clustr', 5])
 
 ```
 
+## 4. Concurrency Programming
+
+The main loop of this program generates threads that generate random numbers and call a synchronized function to put data into a buffer. The synchronized "addToBuffer" function takes an int as an input, adds it to a buffer, then performs the calculations to give the min/max/avg/mode through other functions. When I run the code, it seems like the buffer fills up and the calculations are done correctly, but sometimes the print output is drastically out of order, but showing a later variation of the buffer. I never could work out what was causing this. 
+
+```
+import java.util.Random;
+import java.util.Arrays;
+import java.util.Collections; 
+
+
+public class RunMethodExample implements Runnable{
+    public static int[] buffer = new int[30];
+    //Arrays.fill(buffer, 0);
+    public static int next_write = 0;
+   public void run(){  
+      while (true){  
+        Random rand = new Random(); 
+	    int randint = rand.nextInt(10)+1;
+	    addToBuffer(randint);
+	    
+      }  
+   }  
+   
+   
+   public synchronized void addToBuffer(int value) {
+        RunMethodExample.buffer[RunMethodExample.next_write] = value;
+        int[] tempbuffer = RunMethodExample.buffer;
+        int currentloc = RunMethodExample.next_write;
+        RunMethodExample.next_write = (RunMethodExample.next_write + 1) % 30;
+        int buffersum = Arrays.stream(RunMethodExample.buffer).sum();
+        float bufferavg = getAvgValue(RunMethodExample.buffer);
+        int buffermax = getMaxValue(RunMethodExample.buffer);
+        int buffermin = getMinValue(RunMethodExample.buffer);
+        int buffermode = getMode(RunMethodExample.buffer);
+        System.out.println(Thread.currentThread().getName()+" added value " + value + " to loc " + currentloc + " in the buffer" + 
+        "\nmin: " + buffermin + " max: " + buffermax + " avg: "+bufferavg + " mode: " + buffermode +
+        "\n" + Arrays.toString(tempbuffer) + "\n");
+   }
+   
+   public static int getMaxValue(int[] numbers){
+        int maxValue = numbers[0];
+        for(int i=1;i<numbers.length;i++){
+            if(numbers[i] > maxValue){
+                maxValue = numbers[i];
+            }
+        }
+        return maxValue;
+    }
+    //Find minimum (lowest) value in array using loop
+    public static int getMinValue(int[] numbers){
+        int minValue = numbers[0];
+        for(int i=1;i<numbers.length;i++){
+            if(numbers[i] < minValue){
+                minValue = numbers[i];
+            }
+        }
+        return minValue;
+    }
+    
+    public static float getAvgValue(int[] numbers){
+        float avgValue = numbers[0];
+        for(int i=1;i<numbers.length;i++){
+            avgValue += numbers[i];
+        }
+        avgValue = avgValue/numbers.length;
+        return avgValue;
+    }
+    
+    public static int getMode(final int[] n) {
+        int maxKey = 0;
+        int maxCounts = 0;
+    
+        int[] counts = new int[n.length];
+    
+        for (int i=0; i < n.length; i++) {
+            counts[n[i]]++;
+            if (maxCounts < counts[n[i]]) {
+                maxCounts = counts[n[i]];
+                maxKey = n[i];
+            }
+        }
+        return maxKey;
+    }
+    
+   public static void main(String args[]){  
+      
+      int threadcount = Integer.parseInt(args[0]);
+      System.out.println("executing with " + threadcount + " threads");
+      
+      for (int x=0; x<threadcount; x++)
+      {
+          Thread temp = new Thread(new RunMethodExample(), "thread " + x);
+          temp.start();  
+      }
+   }
+}
+```
+
+
 
 ## 5. SQL Programming
 Part 1
