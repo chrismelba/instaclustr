@@ -35,7 +35,7 @@ done
 This will output a numeric histogram for each individual file. I would love to aggregate them, but not familiar enough with bash to do so. I would also love to make an ASCII bar chart, I saw a few implementations around the place, but again, this is beyond my bash skills.
 
 
-## 2. General Administrator
+## 2. General Administion
 
 Connected to the server using PuTTY. First had to convert .pem into .ppk file [<sup>1</sup>](https://stackoverflow.com/questions/3190667/convert-pem-to-ppk-file-format)
 
