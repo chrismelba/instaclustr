@@ -498,3 +498,12 @@ NAT is Network Address Translation while PAT is Port Address Translation. NAT re
 
 ### C. Explain what a VPN is.
 A VPN is a Virtual Private Network. It allows for traffic to be encrypted on the host computer, sent over the computers internet connection to a host, which can then route the traffic to a different node, potentially in a different location. This has a few uses. It allows for secure data transfer over an ordinarily untrustworthy network, such as at a cafe or hotel. It also allows a user to spoof their physical location, for example to watch USA netflix from Australia. Lately VPNs have been advertised heavily for consumers to use in their homes. The pitch seems to be that you can't trust your giant corporate ISP not to use your traffic inappropriately but you can trust a tiny fly-by-night startup much more. Why one should be more trustworthy than the other has always confused me.
+
+## 9. Memory Management
+
+The CMS (Concurrent Marksweep Garbage collector) will scan the heap and mark instances that can be removed then clear the marked instances. The G1 garbage collector can divide the heap into multip equal parts and then prioritise the segments which have lesser live data. G1 is designed to work with larger heap and server class machines. It typically offers lower max latency at the cost of lower overall throughput. I found various experiments around the internet. [This](https://plumbr.io/blog/garbage-collection/g1-vs-cms-vs-parallel-gc) one found that the max latency was slightly improved at a cost of a massive reduction in throughput, while [this](https://www.novatec-gmbh.de/en/blog/g1-action-better-cms/) found that CMS utterly dominated G1GC, both in total throughput, and max pause as G1 was too slow and had to implement many "stop the world" pauses, each lasting around 20 seconds. It seems wise to run tests on your own hardware and database to determine the best garbage collector for your needs.
+
+
+### Extension
+
+There are a number of things that could cause the OutOfMemoryError in java. It could be that the available heap is not large enough to accomodate all live objects required by the program. It could be that there is a memory leak, where the application unintentionally holds references to objects in the heap, preventing them from being garbage collected. It is possible to dump a histogram of the heap, to have a look at what types of objects are taking up the memory, particularly taking multiple histograms over time and looking at which is growing continuously.
